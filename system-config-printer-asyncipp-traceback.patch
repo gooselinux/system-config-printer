@@ -1,0 +1,140 @@
+diff -up system-config-printer-1.1.16/asyncipp.py.asyncipp-traceback system-config-printer-1.1.16/asyncipp.py
+--- system-config-printer-1.1.16/asyncipp.py.asyncipp-traceback	2010-04-09 16:10:49.000000000 +0200
++++ system-config-printer-1.1.16/asyncipp.py	2010-04-09 16:10:49.000000000 +0200
+@@ -59,6 +59,7 @@ class _IPPConnectionThread(threading.Thr
+         self._auth_handler = auth_handler
+         self._auth_queue = Queue.Queue (1)
+         self.user = None
++        self._destroyed = False
+         debugprint ("+%s" % self)
+ 
+     def __del__ (self):
+@@ -157,6 +158,7 @@ class _IPPConnectionThread(threading.Thr
+             self._queue.task_done ()
+ 
+         debugprint ("Thread exiting")
++        self._destroyed = True
+         del self._conn # already destroyed
+         del self._reply_handler
+         del self._error_handler
+@@ -188,21 +190,23 @@ class _IPPConnectionThread(threading.Thr
+         return password
+ 
+     def _reply (self, result):
+-        def send_reply (result):
+-            self._reply_handler (self._conn, result)
++        def send_reply (handler, result):
++            if not self._destroyed:
++                handler (self._conn, result)
+             return False
+ 
+-        if self._reply_handler:
+-            gobject.idle_add (send_reply, result)
++        if not self._destroyed and self._reply_handler:
++            gobject.idle_add (send_reply, self._reply_handler, result)
+ 
+     def _error (self, exc):
+-        def send_error (exc):
+-            self._error_handler (self._conn, exc)
++        def send_error (handler, exc):
++            if not self._destroyed:
++                handler (self._conn, exc)
+             return False
+ 
+-        if self._error_handler:
++        if not self._destroyed and self._error_handler:
+             debugprint ("Add %s to idle" % self._error_handler)
+-            gobject.idle_add (send_error, exc)
++            gobject.idle_add (send_error, self._error_handler, exc)
+ 
+ ###
+ ### This is the user-visible class.  Although it does not inherit from
+diff -up system-config-printer-1.1.16/asyncpk0.py.asyncipp-traceback system-config-printer-1.1.16/asyncpk0.py
+--- system-config-printer-1.1.16/asyncpk0.py.asyncipp-traceback	2010-04-09 16:10:49.000000000 +0200
++++ system-config-printer-1.1.16/asyncpk0.py	2010-04-09 16:10:49.000000000 +0200
+@@ -58,6 +58,9 @@ class _PK0AsyncMethodCall(asyncpk1._PK1A
+         asyncpk1._PK1AsyncMethodCall._destroy (self)
+ 
+     def _pk_error_handler (self, exc):
++        if self._destroyed:
++            return
++
+         if exc.get_dbus_name () != asyncpk1.CUPS_PK_NEED_AUTH:
+             return asyncpk1._PK1AsyncMethodCall._pk_error_handler (self, exc)
+ 
+@@ -89,6 +92,9 @@ class _PK0AsyncMethodCall(asyncpk1._PK1A
+             return asyncpk1._PK1AsyncMethodCall._pk_error_handler (self, exc)
+ 
+     def _auth_reply_handler (self, result):
++        if self._destroyed:
++            return
++
+         if type (result) != dbus.Boolean:
+             self.call_fallback_fn ()
+             return
+@@ -103,6 +109,9 @@ class _PK0AsyncMethodCall(asyncpk1._PK1A
+         self.call ()
+ 
+     def _auth_error_handler (self, exc):
++        if self._destroyed:
++            return
++
+         self.call_fallback_fn ()
+ 
+ ###
+diff -up system-config-printer-1.1.16/asyncpk1.py.asyncipp-traceback system-config-printer-1.1.16/asyncpk1.py
+--- system-config-printer-1.1.16/asyncpk1.py.asyncipp-traceback	2010-04-09 16:10:49.000000000 +0200
++++ system-config-printer-1.1.16/asyncpk1.py	2010-04-09 16:10:49.000000000 +0200
+@@ -63,6 +63,7 @@ class _PK1AsyncMethodCall:
+         self._fallback_fn = fallback_fn
+         self._fallback_args = args
+         self._fallback_kwds = kwds
++        self._destroyed = False
+         debugprint ("+_PK1AsyncMethodCall: %s" % self)
+ 
+     def __del__ (self):
+@@ -83,6 +84,7 @@ class _PK1AsyncMethodCall:
+ 
+     def _destroy (self):
+         debugprint ("DESTROY: %s" % self)
++        self._destroyed = True
+         del self._bus
+         del self._conn
+         del self._pk_method_name
+@@ -95,6 +97,9 @@ class _PK1AsyncMethodCall:
+         del self._fallback_kwds
+ 
+     def _pk_reply_handler (self, error, *args):
++        if self._destroyed:
++            return
++
+         if str (error) == '':
+             self._client_reply_handler (self._conn, self._unpack_fn (*args))
+             self._destroy ()
+@@ -104,6 +109,9 @@ class _PK1AsyncMethodCall:
+         self.call_fallback_fn ()
+ 
+     def _pk_error_handler (self, exc):
++        if self._destroyed:
++            return
++
+         if exc.get_dbus_name () == CUPS_PK_NEED_AUTH:
+             exc = cups.IPPError (cups.IPP_NOT_AUTHORIZED, 'pkcancel')
+             self._client_error_handler (self._conn, exc)
+@@ -121,10 +129,16 @@ class _PK1AsyncMethodCall:
+         self._fallback_fn (*self._fallback_args, **self._fallback_kwds)
+ 
+     def _ipp_reply_handler (self, conn, *args):
++        if self._destroyed:
++            return
++
+         self._client_reply_handler (self._conn, *args)
+         self._destroy ()
+ 
+     def _ipp_error_handler (self, conn, *args):
++        if self._destroyed:
++            return
++
+         self._client_error_handler (self._conn, *args)
+         self._destroy ()
+ 

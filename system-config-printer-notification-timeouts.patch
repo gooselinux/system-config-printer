@@ -1,0 +1,19 @@
+diff -up system-config-printer-1.1.16/applet.py.notification-timeouts system-config-printer-1.1.16/applet.py
+--- system-config-printer-1.1.16/applet.py.notification-timeouts	2009-12-22 14:44:19.000000000 +0000
++++ system-config-printer-1.1.16/applet.py	2010-01-06 15:43:24.219409075 +0000
+@@ -126,6 +126,7 @@ class NewPrinterNotification(dbus.servic
+             n = pynotify.Notification (title, text, 'printer')
+             if "actions" in pynotify.get_server_caps():
+                 n.set_urgency (pynotify.URGENCY_CRITICAL)
++                n.set_timeout (pynotify.EXPIRES_NEVER)
+                 n.add_action ("setup-printer", _("Search"),
+                               lambda x, y:
+                                   self.setup_printer (x, y, name, devid))
+@@ -182,6 +183,7 @@ class NewPrinterNotification(dbus.servic
+                 if "actions" in pynotify.get_server_caps():
+                     try:
+                         self.packagekit = installpackage.PackageKit ()
++                        n.set_timeout (pynotify.EXPIRES_NEVER)
+                         n.add_action ("install-driver", _("Install"),
+                                       lambda x, y:
+                                           self.install_driver (x, y,

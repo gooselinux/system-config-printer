@@ -1,0 +1,23 @@
+diff -up system-config-printer-1.1.16/system-config-printer.py.auto_make system-config-printer-1.1.16/system-config-printer.py
+--- system-config-printer-1.1.16/system-config-printer.py.auto_make	2010-06-07 19:10:12.000000000 +0200
++++ system-config-printer-1.1.16/system-config-printer.py	2010-06-07 19:11:07.000000000 +0200
+@@ -4016,8 +4016,8 @@ class NewPrinterGUI(GtkGUI):
+                             self.auto_driver = ppd
+                             break
+                 else:
+-                    self.auto_make = None
+-                    self.auto_model = None
++                    self.auto_make = ""
++                    self.auto_model = ""
+                     self.auto_driver = None
+             else:
+                 # Special CUPS names for a raw queue.
+@@ -4292,7 +4292,7 @@ class NewPrinterGUI(GtkGUI):
+                 self.dialog_mode == "printer_with_uri":
+             self.busy (self.NewPrinterWindow)
+             if page_nr == 1: # Device (first page)
+-                self.auto_make, self.auto_model = None, None
++                self.auto_make, self.auto_model = "", ""
+                 self.auto_driver = None
+                 self.device.uri = self.getDeviceURI()
+                 if not self.install_hplip_plugin(self.device.uri):

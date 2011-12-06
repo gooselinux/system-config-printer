@@ -1,0 +1,31 @@
+diff -up system-config-printer-1.1.16/system-config-printer.py.ink-levels system-config-printer-1.1.16/system-config-printer.py
+--- system-config-printer-1.1.16/system-config-printer.py.ink-levels	2010-01-06 15:49:08.433408576 +0000
++++ system-config-printer-1.1.16/system-config-printer.py	2010-01-06 15:50:54.892284445 +0000
+@@ -2505,6 +2505,7 @@ class GUI(GtkGUI, monitor.Watcher):
+             self.vboxMarkerLevels.remove (widget)
+ 
+         marker_info = dict()
++        num_markers = 0
+         for (attr, typ) in [('marker-colors', str),
+                             ('marker-names', str),
+                             ('marker-types', str),
+@@ -2521,10 +2522,18 @@ class GUI(GtkGUI, monitor.Watcher):
+                 except TypeError, s:
+                     debugprint ("%s value not coercible to %s: %s" %
+                                 (attr, typ, s))
+-                    val = []
++                    val = map (lambda x: 0.0, val)
+ 
+             marker_info[attr] = val
++            if num_markers == 0 or len (val) < num_markers:
++                num_markers = len (val)
+ 
++        for attr in ['marker-colors', 'marker-names',
++                     'marker-types', 'marker-levels']:
++            if len (marker_info[attr]) > num_markers:
++                debugprint ("Trimming %s from %s" %
++                            (marker_info[attr][num_markers:], attr))
++                del marker_info[attr][num_markers:]
+ 
+         markers = map (lambda color, name, type, level:
+                            (color, name, type, level),

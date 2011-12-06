@@ -1,0 +1,24 @@
+diff -up system-config-printer-1.1.16/system-config-printer.py.select-nonexistent-printer system-config-printer-1.1.16/system-config-printer.py
+--- system-config-printer-1.1.16/system-config-printer.py.select-nonexistent-printer	2010-01-07 12:42:21.062047874 +0000
++++ system-config-printer-1.1.16/system-config-printer.py	2010-01-07 12:42:33.235047115 +0000
+@@ -6896,6 +6896,8 @@ class NewPrinterGUI(GtkGUI):
+                     self.mainapp.cups.addPrinter(name, ppd=ppd)
+                 except cups.IPPError, (e, msg):
+                     self.show_IPP_Error(e, msg)
++                    self.mainapp.cups._end_operation ()
++                    return
+ 
+             self.mainapp.cups._end_operation ()
+ 
+@@ -6923,6 +6925,11 @@ class NewPrinterGUI(GtkGUI):
+ 
+             iter = model.iter_next (iter)
+ 
++        if not self.mainapp.printers.has_key (name):
++            # At this stage the printer has disappeared even though we
++            # only added it moments ago.
++            return
++
+         # Load information about the printer,
+         # e.g. self.mainapp.server_side_options and self.mainapp.ppd
+         # (both used below).

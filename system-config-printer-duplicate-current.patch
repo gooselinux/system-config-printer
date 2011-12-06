@@ -1,0 +1,33 @@
+diff -up system-config-printer-1.1.16/system-config-printer.py.duplicate-current system-config-printer-1.1.16/system-config-printer.py
+--- system-config-printer-1.1.16/system-config-printer.py.duplicate-current	2010-01-25 16:03:02.859210318 +0000
++++ system-config-printer-1.1.16/system-config-printer.py	2010-01-25 16:03:38.617208297 +0000
+@@ -4828,7 +4828,7 @@ class NewPrinterGUI(GtkGUI):
+         gobject.idle_add (self.queryPPDs)
+ 
+         # Add the network devices to the list.
+-        self.add_devices (result, current_uri)
++        self.add_devices (result, current_uri, no_more=True)
+ 
+     def install_hplip_plugin(self, uri):
+         """
+@@ -5171,16 +5171,18 @@ class NewPrinterGUI(GtkGUI):
+         self.fetchDevices_conn._begin_operation (_("fetching device list"))
+         self.fetchDevices (network=False, current_uri=current_uri)
+ 
+-    def add_devices (self, devices, current_uri):
++    def add_devices (self, devices, current_uri, no_more=False):
+         if current_uri:
+             if devices.has_key (current_uri):
+                 current = devices.pop(current_uri)
+             elif devices.has_key (current_uri.replace (":9100", "")):
+                 current_uri = current_uri.replace (":9100", "")
+                 current = devices.pop(current_uri)
+-            else:
++            elif no_more:
+                 current = cupshelpers.Device (current_uri)
+                 current.info = "Current device"
++            else:
++                current_uri = None
+ 
+         devices = devices.values()
+ 

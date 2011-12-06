@@ -1,0 +1,18 @@
+diff -up system-config-printer-1.1.16/system-config-printer.py.empty-class system-config-printer-1.1.16/system-config-printer.py
+--- system-config-printer-1.1.16/system-config-printer.py.empty-class	2010-03-03 11:54:30.360619055 +0000
++++ system-config-printer-1.1.16/system-config-printer.py	2010-03-03 11:55:15.021743720 +0000
+@@ -2331,8 +2331,12 @@ class GUI(GtkGUI, monitor.Watcher):
+             if self.ppd_local != False:
+                 self.ppd_local.localize()
+         except cups.IPPError, (e, m):
+-            # Some IPP error other than IPP_NOT_FOUND.
+-            show_IPP_Error(e, m, self.PrintersWindow)
++            # We might get IPP_INTERNAL_ERROR if this is a memberless
++            # class.
++            if e != cups.IPP_INTERNAL_ERROR:
++                # Some IPP error other than IPP_NOT_FOUND.
++                show_IPP_Error(e, m, self.PrintersWindow)
++
+             # Treat it as a raw queue.
+             self.ppd = False
+         except RuntimeError:

@@ -1,0 +1,145 @@
+diff -up system-config-printer-1.1.16/probe_printer.py.popen-close_fds system-config-printer-1.1.16/probe_printer.py
+--- system-config-printer-1.1.16/probe_printer.py.popen-close_fds	2010-06-07 18:26:27.000000000 +0200
++++ system-config-printer-1.1.16/probe_printer.py	2010-06-07 18:38:30.000000000 +0200
+@@ -256,6 +256,7 @@ class PrinterFinder:
+         try:
+             p = subprocess.Popen (args=["/usr/lib/cups/backend/snmp",
+                                         self.hostname],
++                                  close_fds=True,
+                                   stdin=null,
+                                   stdout=subprocess.PIPE,
+                                   stderr=null)
+@@ -315,6 +316,7 @@ class PrinterFinder:
+         null = file ("/dev/null", "r+")
+         try:
+             p = subprocess.Popen (args=["hp-makeuri", "-c", self.hostname],
++                                  close_fds=True,
+                                   stdin=null,
+                                   stdout=subprocess.PIPE,
+                                   stderr=null)
+diff -up system-config-printer-1.1.16/system-config-printer.py.popen-close_fds system-config-printer-1.1.16/system-config-printer.py
+--- system-config-printer-1.1.16/system-config-printer.py.popen-close_fds	2010-06-07 18:26:27.000000000 +0200
++++ system-config-printer-1.1.16/system-config-printer.py	2010-06-07 18:45:03.000000000 +0200
+@@ -4856,7 +4856,7 @@ class NewPrinterGUI(GtkGUI):
+         cmd = 'LC_ALL=C DISPLAY= hp-info -x -i -d"${URI}"'
+         debugprint (uri + ": " + cmd)
+         try:
+-            p = subprocess.Popen (cmd, shell=True,
++            p = subprocess.Popen (cmd, shell=True, close_fds=True,
+                                   stdin=file("/dev/null"),
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+@@ -4909,7 +4909,7 @@ class NewPrinterGUI(GtkGUI):
+             cmd = 'LC_ALL=C hp-mkuri -c'
+             debugprint (uri + ": " + hpmodel)
+             try:
+-                p = subprocess.Popen (cmd, shell=True,
++                p = subprocess.Popen (cmd, shell=True, close_fds=True,
+                                       stdin=file("/dev/null"),
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE)
+@@ -5012,7 +5012,7 @@ class NewPrinterGUI(GtkGUI):
+             try:
+                 install_result = -1
+                 for cmd in cmds:
+-                    p = subprocess.Popen(cmd, shell=True,
++                    p = subprocess.Popen(cmd, shell=True, close_fds=True,
+                                          stdin=file("/dev/null"),
+                                          stdout=subprocess.PIPE,
+                                          stderr=subprocess.PIPE)
+@@ -5038,7 +5038,7 @@ class NewPrinterGUI(GtkGUI):
+         cmd = 'LC_ALL=C DISPLAY= hp-info -x -i -d"${URI}"'
+         debugprint (faxuri + ": " + cmd)
+         try:
+-            p = subprocess.Popen (cmd, shell=True,
++            p = subprocess.Popen (cmd, shell=True, close_fds=True,
+                                   stdin=file("/dev/null"),
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+@@ -5073,7 +5073,7 @@ class NewPrinterGUI(GtkGUI):
+         debugprint (host + ": " + cmd)
+         uri = None
+         try:
+-            p = subprocess.Popen (cmd, shell=True,
++            p = subprocess.Popen (cmd, shell=True, close_fds=True,
+                                   stdin=file("/dev/null"),
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+@@ -5114,7 +5114,7 @@ class NewPrinterGUI(GtkGUI):
+             debugprint (host + ": " + cmd)
+             stdout = None
+             try:
+-                p = subprocess.Popen (cmd, shell=True,
++                p = subprocess.Popen (cmd, shell=True, close_fds=True,
+                                       stdin=file("/dev/null"),
+                                       stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE)
+@@ -6677,6 +6677,7 @@ class NewPrinterGUI(GtkGUI):
+                     # so we intentionally don't set LC_ALL=C here.
+                     p = subprocess.Popen (['/usr/bin/cupstestppd',
+                                            '-rvv', filename],
++                                          close_fds=True,
+                                           stdin=file("/dev/null"),
+                                           stdout=subprocess.PIPE,
+                                           stderr=subprocess.PIPE)
+diff -up system-config-printer-1.1.16/troubleshoot/CheckNetworkServerSanity.py.popen-close_fds system-config-printer-1.1.16/troubleshoot/CheckNetworkServerSanity.py
+--- system-config-printer-1.1.16/troubleshoot/CheckNetworkServerSanity.py.popen-close_fds	2009-12-03 18:06:23.000000000 +0100
++++ system-config-printer-1.1.16/troubleshoot/CheckNetworkServerSanity.py	2010-06-07 18:46:51.000000000 +0200
+@@ -175,7 +175,7 @@ class CheckNetworkServerSanity(Question)
+         if (self.answers['remote_server_name_resolves'] and
+             not answers.has_key ('remote_server_traceroute')):
+             try:
+-                self.op = TimedSubprocess (parent=parent,
++                self.op = TimedSubprocess (parent=parent, close_fds=True,
+                                            args=['traceroute', '-w', '1',
+                                                  server_name],
+                                            stdin=file("/dev/null"),
+diff -up system-config-printer-1.1.16/troubleshoot/CheckPPDSanity.py.popen-close_fds system-config-printer-1.1.16/troubleshoot/CheckPPDSanity.py
+--- system-config-printer-1.1.16/troubleshoot/CheckPPDSanity.py.popen-close_fds	2009-12-03 18:06:23.000000000 +0100
++++ system-config-printer-1.1.16/troubleshoot/CheckPPDSanity.py	2010-06-07 18:48:04.000000000 +0200
+@@ -98,6 +98,7 @@ class CheckPPDSanity(Question):
+             try:
+                 self.op = TimedSubprocess (parent=parent,
+                                            args=['cupstestppd', '-rvv', tmpf],
++                                           close_fds=True,
+                                            stdin=file("/dev/null"),
+                                            stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE)
+diff -up system-config-printer-1.1.16/troubleshoot/CheckPrinterSanity.py.popen-close_fds system-config-printer-1.1.16/troubleshoot/CheckPrinterSanity.py
+--- system-config-printer-1.1.16/troubleshoot/CheckPrinterSanity.py.popen-close_fds	2009-12-03 18:06:23.000000000 +0100
++++ system-config-printer-1.1.16/troubleshoot/CheckPrinterSanity.py	2010-06-07 18:49:29.000000000 +0200
+@@ -90,6 +90,7 @@ class CheckPrinterSanity(Question):
+                     p = TimedSubprocess (parent=parent,
+                                          timeout=5000,
+                                          args=cmdline, shell=True,
++                                         close_fds=True,
+                                          stdin=file("/dev/null"),
+                                          stdout=subprocess.PIPE,
+                                          stderr=subprocess.PIPE)
+@@ -113,6 +114,7 @@ class CheckPrinterSanity(Question):
+                     p = TimedSubprocess (parent=parent,
+                                          timeout=3000,
+                                          args='LC_ALL=C DISPLAY= hp-info -d"$URI"',
++                                         close_fds=True,
+                                          shell=True,
+                                          stdin=file("/dev/null"),
+                                          stdout=subprocess.PIPE,
+diff -up system-config-printer-1.1.16/troubleshoot/CheckUSBPermissions.py.popen-close_fds system-config-printer-1.1.16/troubleshoot/CheckUSBPermissions.py
+--- system-config-printer-1.1.16/troubleshoot/CheckUSBPermissions.py.popen-close_fds	2009-12-03 18:06:23.000000000 +0100
++++ system-config-printer-1.1.16/troubleshoot/CheckUSBPermissions.py	2010-06-07 18:50:28.000000000 +0200
+@@ -61,6 +61,7 @@ class CheckUSBPermissions(Question):
+         try:
+             self.op = TimedSubprocess (parent=parent,
+                                        args="LC_ALL=C " + LSUSB + " -v",
++                                       close_fds=True,
+                                        shell=True,
+                                        stdin=file("/dev/null"),
+                                        stdout=subprocess.PIPE,
+@@ -141,6 +142,7 @@ class CheckUSBPermissions(Question):
+                 self.op = TimedSubprocess (parent=parent,
+                                            args="LC_ALL=C %s %s" % (GETFACL,
+                                                                     path),
++                                           close_fds=True,
+                                            shell=True,
+                                            stdin=file("/dev/null"),
+                                            stdout=subprocess.PIPE,

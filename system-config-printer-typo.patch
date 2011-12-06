@@ -1,0 +1,12 @@
+diff -up system-config-printer-1.1.16/system-config-printer.py.typo system-config-printer-1.1.16/system-config-printer.py
+--- system-config-printer-1.1.16/system-config-printer.py.typo	2009-12-22 14:44:19.000000000 +0000
++++ system-config-printer-1.1.16/system-config-printer.py	2009-12-23 14:54:15.138689711 +0000
+@@ -4564,7 +4564,7 @@ class NewPrinterGUI(GtkGUI):
+                     not self.device.type in ("socket", "lpd", "ipp",
+                                              "http", "https", "bluetooth")):
+                     name = "%s %s" % (self.device.id_dict["MFG"], 
+-                                      elf.device.id_dict["MDL"])
++                                      self.device.id_dict["MDL"])
+                     descr = "%s %s" % (self.device.id_dict["MFG"],
+                                        self.device.id_dict["MDL"])
+             except:

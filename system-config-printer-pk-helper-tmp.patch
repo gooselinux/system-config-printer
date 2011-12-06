@@ -1,0 +1,29 @@
+diff -up system-config-printer-1.1.16/asyncpk1.py.pk-helper-tmp system-config-printer-1.1.16/asyncpk1.py
+--- system-config-printer-1.1.16/asyncpk1.py.pk-helper-tmp	2010-06-07 18:26:27.000000000 +0200
++++ system-config-printer-1.1.16/asyncpk1.py	2010-06-07 19:00:05.000000000 +0200
+@@ -149,7 +149,10 @@ class _WriteToTmpFile:
+     def __init__ (self, kwds, reply_handler, error_handler):
+         self._reply_handler = reply_handler
+         self._error_handler = error_handler
+-        (tmpfd, tmpfname) = tempfile.mkstemp ()
++
++        # Create the temporary file in /tmp to ensure that
++        # cups-pk-helper-mechanism is able to write to it.
++        (tmpfd, tmpfname) = tempfile.mkstemp (dir="/tmp")
+         os.close (tmpfd)
+         self._filename = tmpfname
+         debugprint ("Created tempfile %s" % tmpfname)
+diff -up system-config-printer-1.1.16/cupspk.py.pk-helper-tmp system-config-printer-1.1.16/cupspk.py
+--- system-config-printer-1.1.16/cupspk.py.pk-helper-tmp	2009-12-22 15:44:19.000000000 +0100
++++ system-config-printer-1.1.16/cupspk.py	2010-06-07 19:00:49.000000000 +0200
+@@ -462,7 +462,9 @@ class Connection:
+                     filename = None
+ 
+         if (not use_pycups) and (fd != None or file_object != None):
+-            (tmpfd, tmpfname) = tempfile.mkstemp()
++            # Create the temporary file in /tmp to ensure that
++            # cups-pk-helper-mechanism is able to write to it.
++            (tmpfd, tmpfname) = tempfile.mkstemp(dir="/tmp")
+             os.close (tmpfd)
+ 
+             pk_args = (resource, tmpfname)

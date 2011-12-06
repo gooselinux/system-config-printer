@@ -1,0 +1,30 @@
+diff -up system-config-printer-1.1.16/jobviewer.py.not-shown-notification system-config-printer-1.1.16/jobviewer.py
+--- system-config-printer-1.1.16/jobviewer.py.not-shown-notification	2010-03-10 14:51:04.000000000 +0100
++++ system-config-printer-1.1.16/jobviewer.py	2010-03-10 15:07:39.000000000 +0100
+@@ -326,7 +326,12 @@ class JobViewer (GtkGUI, monitor.Watcher
+                   self.state_reason_notifications.values ()]:
+             for notification in l:
+                 if notification.get_data ('closed') != True:
+-                    notification.close ()
++                    try:
++                        notification.close ()
++                    except glib.GError:
++                        # Can fail if the notification wasn't even shown
++                        # yet (as in bug #572142).
++                        pass
+                     notification.set_data ('closed', True)
+ 
+         if self.job_creation_times_timer != None:
+@@ -1487,7 +1492,11 @@ class JobViewer (GtkGUI, monitor.Watcher
+             return
+ 
+         if notification.get_data ('closed') != True:
+-            notification.close ()
++            try:
++                notification.close ()
++            except glib.GError:
++                # Can fail if the notification wasn't even shown
++                pass
+             notification.set_data ('closed', True)
+ 
+     def printer_event (self, mon, printer, eventname, event):

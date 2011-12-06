@@ -1,0 +1,22 @@
+diff -up system-config-printer-1.1.16/AdvancedServerSettings.py.imports system-config-printer-1.1.16/AdvancedServerSettings.py
+--- system-config-printer-1.1.16/AdvancedServerSettings.py.imports	2009-12-22 15:44:19.000000000 +0100
++++ system-config-printer-1.1.16/AdvancedServerSettings.py	2010-04-09 15:41:31.000000000 +0200
+@@ -20,6 +20,7 @@
+ ## Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ 
+ from gettext import gettext as _
++import cups
+ import gobject
+ import gtk
+ import os
+diff -up system-config-printer-1.1.16/jobviewer.py.imports system-config-printer-1.1.16/jobviewer.py
+--- system-config-printer-1.1.16/jobviewer.py.imports	2010-04-09 15:08:58.000000000 +0200
++++ system-config-printer-1.1.16/jobviewer.py	2010-04-09 15:41:07.000000000 +0200
+@@ -23,6 +23,7 @@ import dbus.glib
+ import dbus.service
+ import pynotify
+ import gettext
++import glib
+ import gobject
+ import gtk
+ import gtk.gdk

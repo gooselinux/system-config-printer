@@ -1,0 +1,181 @@
+diff -up system-config-printer-1.1.16/glade/NewPrinterWindow.glade.various-i18n-l10n system-config-printer-1.1.16/glade/NewPrinterWindow.glade
+--- system-config-printer-1.1.16/glade/NewPrinterWindow.glade.various-i18n-l10n	2009-12-22 15:44:19.000000000 +0100
++++ system-config-printer-1.1.16/glade/NewPrinterWindow.glade	2010-06-24 18:06:03.000000000 +0200
+@@ -1122,7 +1122,6 @@
+ 
+ 					      <child>
+ 						<widget class="GtkButton" id="btnIPPVerify">
+-						  <property name="width_request">92</property>
+ 						  <property name="visible">True</property>
+ 						  <property name="can_focus">True</property>
+ 						  <property name="relief">GTK_RELIEF_NORMAL</property>
+@@ -2357,7 +2356,6 @@ DTR/DSR (Hardware)</property>
+ 
+ 					  <child>
+ 					    <widget class="GtkButton" id="btnSMBVerify">
+-					      <property name="width_request">92</property>
+ 					      <property name="visible">True</property>
+ 					      <property name="can_focus">True</property>
+ 					      <property name="relief">GTK_RELIEF_NORMAL</property>
+diff -up system-config-printer-1.1.16/PhysicalDevice.py.various-i18n-l10n system-config-printer-1.1.16/PhysicalDevice.py
+--- system-config-printer-1.1.16/PhysicalDevice.py.various-i18n-l10n	2009-12-03 18:06:22.000000000 +0100
++++ system-config-printer-1.1.16/PhysicalDevice.py	2010-06-24 18:15:23.000000000 +0200
+@@ -20,6 +20,7 @@
+ from gettext import gettext as _
+ import cupshelpers
+ import urllib
++import ppdippstr
+ 
+ class PhysicalDevice:
+     def __init__(self, device):
+@@ -27,6 +28,7 @@ class PhysicalDevice:
+         self._network_host = None
+         self.add_device (device)
+         self._user_data = {}
++        self._ppdippstr = ppdippstr.backends
+ 
+     def _canonical_id (self, device):
+         mfg = device.id_dict.get ('MFG', '')
+@@ -111,7 +113,7 @@ class PhysicalDevice:
+         # case of the hpfax backend), show the device-info field
+         # instead.
+         if self.mfg == '' or (self.mfg == "HP" and self.mdl == "Fax"):
+-            return self.devices[0].info
++            return self._ppdippstr.get (self.devices[0].info)
+ 
+         info = "%s %s" % (self.mfg, self.mdl)
+         if len (self.sn) > 0:
+diff -up system-config-printer-1.1.16/ppdippstr.py.various-i18n-l10n system-config-printer-1.1.16/ppdippstr.py
+--- system-config-printer-1.1.16/ppdippstr.py.various-i18n-l10n	2009-12-03 18:06:23.000000000 +0100
++++ system-config-printer-1.1.16/ppdippstr.py	2010-06-24 18:39:15.000000000 +0200
+@@ -26,6 +26,7 @@ printer_op_policy = dict()
+ job_sheets = dict()
+ job_options = dict()
+ ppd = dict()
++backends = dict()
+ 
+ class TranslationDict:
+     STR = {}
+@@ -158,3 +159,24 @@ def init ():
+             "1200 dpi, Photo, Black + Color Cartr., Photo Paper":
+                 _("1200 dpi, photo, black + color cartridge, photo paper"),
+             })
++
++    ## Common backend descriptions
++    global backends
++    backends = TranslationDict ({
++            "Internet Printing Protocol (ipp)":
++                _("Internet Printing Protocol (ipp)"),
++            "Internet Printing Protocol (http)":
++                _("Internet Printing Protocol (http)"),
++            "Internet Printing Protocol (https)":
++                _("Internet Printing Protocol (https)"),
++            "LPD/LPR Host or Printer":
++                _("LPD/LPR Host or Printer"),
++            "AppSocket/HP JetDirect":
++                _("AppSocket/HP JetDirect"),
++            "Serial Port #1":
++                _("Serial Port #1"),
++            "LPT #1":
++                _("LPT #1"),
++            "Windows Printer via SAMBA":
++                _("Windows Printer via SAMBA"),
++            })
+diff -up system-config-printer-1.1.16/pysmb.py.various-i18n-l10n system-config-printer-1.1.16/pysmb.py
+--- system-config-printer-1.1.16/pysmb.py.various-i18n-l10n	2009-12-03 18:06:23.000000000 +0100
++++ system-config-printer-1.1.16/pysmb.py	2010-06-24 18:54:12.000000000 +0200
+@@ -80,7 +80,7 @@ class AuthContext:
+             d.destroy ()
+ 
+         # After that, prompt
+-        d = gtk.Dialog ("Authentication", self.parent,
++        d = gtk.Dialog (_("Authentication"), self.parent,
+                         gtk.DIALOG_MODAL | gtk.DIALOG_NO_SEPARATOR,
+                         (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                          gtk.STOCK_OK, gtk.RESPONSE_OK))
+@@ -95,7 +95,7 @@ class AuthContext:
+         hbox.pack_start (image, False, False, 0)
+         vbox = gtk.VBox (False, 12)
+         label = gtk.Label ('<span weight="bold" size="larger">' +
+-                           "You must log in to access %s." % self.for_server +
++                           _("You must log in to access %s.") % self.for_server +
+                            '</span>')
+         label.set_use_markup (True)
+         label.set_alignment (0, 0)
+@@ -105,13 +105,13 @@ class AuthContext:
+         table = gtk.Table (3, 2)
+         table.set_row_spacings (6)
+         table.set_col_spacings (6)
+-        table.attach (gtk.Label ("Username:"), 0, 1, 0, 1, 0, 0)
++        table.attach (gtk.Label (_("Username:")), 0, 1, 0, 1, 0, 0)
+         username_entry = gtk.Entry ()
+         table.attach (username_entry, 1, 2, 0, 1, 0, 0)
+-        table.attach (gtk.Label ("Domain:"), 0, 1, 1, 2, 0, 0)
++        table.attach (gtk.Label (_("Domain:")), 0, 1, 1, 2, 0, 0)
+         domain_entry = gtk.Entry ()
+         table.attach (domain_entry, 1, 2, 1, 2, 0, 0)
+-        table.attach (gtk.Label ("Password:"), 0, 1, 2, 3, 0, 0)
++        table.attach (gtk.Label (_("Password:")), 0, 1, 2, 3, 0, 0)
+         password_entry = gtk.Entry ()
+         password_entry.set_activates_default (True)
+         password_entry.set_visibility (False)
+diff -up system-config-printer-1.1.16/troubleshoot/base.py.various-i18n-l10n system-config-printer-1.1.16/troubleshoot/base.py
+--- system-config-printer-1.1.16/troubleshoot/base.py.various-i18n-l10n	2009-12-03 18:06:23.000000000 +0100
++++ system-config-printer-1.1.16/troubleshoot/base.py	2010-06-24 18:12:13.000000000 +0200
+@@ -21,6 +21,7 @@
+ 
+ import gtk
+ from gettext import gettext as _
++N_ = lambda x: x
+ from debug import *
+ 
+ __all__ = [ 'gtk',
+@@ -30,9 +31,9 @@ __all__ = [ 'gtk',
+             'Multichoice',
+             'TEXT_start_print_admin_tool' ]
+ 
+-TEXT_start_print_admin_tool = _("To start this tool, select "
+-                                "System->Administration->Printing "
+-                                "from the main menu.")
++TEXT_start_print_admin_tool = N_("To start this tool, select "
++                                 "System->Administration->Printing "
++                                 "from the main menu.")
+ 
+ class Question:
+     def __init__ (self, troubleshooter, name=None):
+diff -up system-config-printer-1.1.16/troubleshoot/CheckLocalServerPublishing.py.various-i18n-l10n system-config-printer-1.1.16/troubleshoot/CheckLocalServerPublishing.py
+--- system-config-printer-1.1.16/troubleshoot/CheckLocalServerPublishing.py.various-i18n-l10n	2009-12-07 17:59:42.000000000 +0100
++++ system-config-printer-1.1.16/troubleshoot/CheckLocalServerPublishing.py	2010-06-24 18:10:13.000000000 +0200
+@@ -34,7 +34,7 @@ class CheckLocalServerPublishing(Questio
+                                     "connected to this system' option in "
+                                     "the server settings using the printing "
+                                     "administration tool.") + ' ' +
+-                                  TEXT_start_print_admin_tool)
++                                  _(TEXT_start_print_admin_tool))
+         troubleshooter.new_page (vbox, self)
+ 
+     def display (self):
+diff -up system-config-printer-1.1.16/troubleshoot/QueueNotEnabled.py.various-i18n-l10n system-config-printer-1.1.16/troubleshoot/QueueNotEnabled.py
+--- system-config-printer-1.1.16/troubleshoot/QueueNotEnabled.py.various-i18n-l10n	2009-12-03 18:06:23.000000000 +0100
++++ system-config-printer-1.1.16/troubleshoot/QueueNotEnabled.py	2010-06-24 18:10:44.000000000 +0200
+@@ -71,7 +71,7 @@ class QueueNotEnabled(Question):
+             text += _("To enable it, select the 'Enabled' checkbox in the "
+                       "'Policies' tab for the printer in the printer "
+                       "administration tool.")
+-            text += ' ' + TEXT_start_print_admin_tool
++            text += ' ' + _(TEXT_start_print_admin_tool)
+ 
+         self.label.set_markup (text)
+         return True
+diff -up system-config-printer-1.1.16/troubleshoot/QueueRejectingJobs.py.various-i18n-l10n system-config-printer-1.1.16/troubleshoot/QueueRejectingJobs.py
+--- system-config-printer-1.1.16/troubleshoot/QueueRejectingJobs.py.various-i18n-l10n	2009-12-03 18:06:23.000000000 +0100
++++ system-config-printer-1.1.16/troubleshoot/QueueRejectingJobs.py	2010-06-24 18:11:05.000000000 +0200
+@@ -70,7 +70,7 @@ class QueueRejectingJobs(Question):
+             text += _("To make the queue accept jobs, select the "
+                       "'Accepting Jobs' checkbox in the 'Policies' "
+                       "tab for the printer in the printer administration "
+-                      "tool.") + ' ' + TEXT_start_print_admin_tool
++                      "tool.") + ' ' + _(TEXT_start_print_admin_tool)
+ 
+         self.label.set_text (text)
+         return True

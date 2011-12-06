@@ -1,0 +1,59 @@
+diff -up system-config-printer-1.1.16/asyncpk0.py.async-fallback-2 system-config-printer-1.1.16/asyncpk0.py
+--- system-config-printer-1.1.16/asyncpk0.py.async-fallback-2	2009-12-22 15:44:19.000000000 +0100
++++ system-config-printer-1.1.16/asyncpk0.py	2010-02-04 13:51:56.000000000 +0100
+@@ -124,16 +124,24 @@ class PK0Connection(asyncpk1.PK1Connecti
+                        fallback_fn, args, kwds):
+         asyncmethodcall = _PK0AsyncMethodCall (self._system_bus, self,
+                                                pk_method_name, pk_args,
+-                                               reply_handler, error_handler,
++                                               reply_handler,
++                                               error_handler,
+                                                unpack_fn, fallback_fn,
+-                                               args, kwds, self._parent)
++                                               args, kwds,
++                                               self._parent)
++
++
++        if not use_pycups:
++            try:
++                debugprint ("Calling PK method %s" % pk_method_name)
++                asyncmethodcall.call ()
++            except dbus.DBusException, e:
++                debugprint ("D-Bus call failed: %s" % repr (e))
++                use_pycups = True
+ 
+         if use_pycups:
+             return asyncmethodcall.call_fallback_fn ()
+ 
+-        debugprint ("Calling PK method %s" % pk_method_name)
+-        asyncmethodcall.call ()
+-
+ if __name__ == '__main__':
+     import gobject
+     import gtk
+diff -up system-config-printer-1.1.16/asyncpk1.py.async-fallback-2 system-config-printer-1.1.16/asyncpk1.py
+--- system-config-printer-1.1.16/asyncpk1.py.async-fallback-2	2010-02-04 13:42:03.000000000 +0100
++++ system-config-printer-1.1.16/asyncpk1.py	2010-02-04 13:51:36.000000000 +0100
+@@ -288,15 +288,15 @@ class PK1Connection:
+     def _call_with_pk (self, use_pycups, pk_method_name, pk_args,
+                        reply_handler, error_handler, unpack_fn,
+                        fallback_fn, args, kwds):
++        asyncmethodcall = _PK1AsyncMethodCall (self._system_bus, self,
++                                               pk_method_name, pk_args,
++                                               reply_handler,
++                                               error_handler,
++                                               unpack_fn, fallback_fn,
++                                               args, kwds)
++
+         if not use_pycups:
+             try:
+-                asyncmethodcall = _PK1AsyncMethodCall (self._system_bus, self,
+-                                                       pk_method_name, pk_args,
+-                                                       reply_handler,
+-                                                       error_handler,
+-                                                       unpack_fn, fallback_fn,
+-                                                       args, kwds)
+-
+                 debugprint ("Calling PK method %s" % pk_method_name)
+                 asyncmethodcall.call ()
+             except dbus.DBusException, e:

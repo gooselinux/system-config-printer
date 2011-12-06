@@ -1,0 +1,56 @@
+diff -up system-config-printer-1.1.13/Makefile.am.no-epydoc system-config-printer-1.1.13/Makefile.am
+--- system-config-printer-1.1.13/Makefile.am.no-epydoc	2009-09-04 10:35:47.000000000 +0100
++++ system-config-printer-1.1.13/Makefile.am	2009-10-30 11:32:02.265645319 +0000
+@@ -251,7 +251,9 @@ $(man_MANS): $(top_srcdir)/man/system-co
+ 
+ html:	$(EXPORT_MODULES)
+ 	rm -rf html
+-	epydoc -o html --html $(EXPORT_MODULES)
++	$(MKDIR_P) html
++	pydoc -w $(EXPORT_MODULES)
++	mv $(patsubst %,%.html,$(EXPORT_MODULES)) html
+ 
+ distcheck-hook: update-po
+ 
+diff -up system-config-printer-1.1.13/Makefile.in.no-epydoc system-config-printer-1.1.13/Makefile.in
+--- system-config-printer-1.1.13/Makefile.in.no-epydoc	2009-09-14 15:14:03.000000000 +0100
++++ system-config-printer-1.1.13/Makefile.in	2009-10-30 11:32:02.266644059 +0000
+@@ -1435,7 +1435,9 @@ $(man_MANS): $(top_srcdir)/man/system-co
+ 
+ html:	$(EXPORT_MODULES)
+ 	rm -rf html
+-	epydoc -o html --html $(EXPORT_MODULES)
++	$(MKDIR_P) html
++	pydoc -w $(EXPORT_MODULES)
++	mv $(patsubst %,%.html,$(EXPORT_MODULES)) html
+ 
+ distcheck-hook: update-po
+ 
+diff -up system-config-printer-1.1.13/pycups-1.9.47/Makefile.no-epydoc system-config-printer-1.1.13/pycups-1.9.47/Makefile
+--- system-config-printer-1.1.13/pycups-1.9.47/Makefile.no-epydoc	2009-10-30 11:32:53.089519286 +0000
++++ system-config-printer-1.1.13/pycups-1.9.47/Makefile	2009-10-30 11:33:07.606519162 +0000
+@@ -14,7 +14,9 @@ cups.so: $(SOURCES)
+ 
+ doc:	cups.so
+ 	rm -rf html
+-	epydoc -o html --html $<
++	mkdir -p html
++	pydoc -w $(patsubst %.so,%,$<)
++	mv $(patsubst %.so,%.html,$<) html
+ 
+ clean:
+ 	-rm -rf build cups.so *.pyc *~
+diff -up system-config-printer-1.1.13/pysmbc-1.0.6/Makefile.no-epydoc system-config-printer-1.1.13/pysmbc-1.0.6/Makefile
+--- system-config-printer-1.1.13/pysmbc-1.0.6/Makefile.no-epydoc	2009-10-30 11:32:18.597519903 +0000
++++ system-config-printer-1.1.13/pysmbc-1.0.6/Makefile	2009-10-30 11:32:43.671520242 +0000
+@@ -12,7 +12,9 @@ smbc.so: $(SOURCES)
+ 
+ doc: smbc.so
+ 	rm -rf html
+-	epydoc -o html --html $<
++	mkdir -p html
++	pydoc -w $(patsubst %.so,%,$<)
++	mv $(patsubst %.so,%.html,$<) html
+ 
+ clean:
+ 	-rm -rf build smbc.so *.pyc *~

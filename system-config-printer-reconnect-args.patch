@@ -1,0 +1,21 @@
+diff -up system-config-printer-1.1.16/asyncipp.py.reconnect-args system-config-printer-1.1.16/asyncipp.py
+--- system-config-printer-1.1.16/asyncipp.py.reconnect-args	2009-12-22 15:27:37.000000000 +0100
++++ system-config-printer-1.1.16/asyncipp.py	2010-04-09 15:48:35.000000000 +0200
+@@ -333,7 +333,7 @@ class _IPPAuthOperation:
+             # This is the initial "connection" operation, or a
+             # subsequent reconnection attempt.
+             debugprint ("Connection/reconnection failed")
+-            return self._reconnect_error (exc)
++            return self._reconnect_error (conn, exc)
+ 
+         if self._cancel:
+             return self._error (exc)
+@@ -353,7 +353,7 @@ class _IPPAuthOperation:
+                 e == cups.IPP_FORBIDDEN):
+                 forbidden = (e == cups.IPP_FORBIDDEN)
+             elif e == cups.IPP_SERVICE_UNAVAILABLE:
+-                return self._reconnect_error (exc)
++                return self._reconnect_error (conn, exc)
+             else:
+                 return self._error (exc)
+         elif type (exc) == cups.HTTPError:

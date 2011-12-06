@@ -1,0 +1,17 @@
+diff -up system-config-printer-1.1.16/cupshelpers/ppds.py.hpcups-requiring-plugin system-config-printer-1.1.16/cupshelpers/ppds.py
+--- system-config-printer-1.1.16/cupshelpers/ppds.py.hpcups-requiring-plugin	2010-03-10 14:51:04.000000000 +0100
++++ system-config-printer-1.1.16/cupshelpers/ppds.py	2010-03-10 15:13:23.000000000 +0100
+@@ -240,7 +240,12 @@ def _getDriverType (ppdname, ppds=None):
+     if ppdname.find ("splix")!= -1:
+         return DRIVER_TYPE_SPLIX
+     if ppdname.find ("hpcups") != -1:
+-        return DRIVER_TYPE_HPCUPS
++        info = ppds.getInfoFromPPDName (ppdname)
++        make_model = info.get ('ppd-make-and-model', '')
++        if make_model.find ("plugin") != -1:
++            return DRIVER_TYPE_3RD_PARTY_NONFREE
++        else:
++            return DRIVER_TYPE_HPCUPS
+     if (ppdname.find (":") == -1 and
+         ppdname.find ("/cups-included/") != -1):
+         return DRIVER_TYPE_CUPS

@@ -1,0 +1,12 @@
+diff -up system-config-printer-1.1.16/probe_printer.py.probe-printer-typo system-config-printer-1.1.16/probe_printer.py
+--- system-config-printer-1.1.16/probe_printer.py.probe-printer-typo	2009-12-22 15:44:19.000000000 +0100
++++ system-config-printer-1.1.16/probe_printer.py	2010-04-09 16:16:00.000000000 +0200
+@@ -193,7 +193,7 @@ class BackgroundSmbAuthContext(pysmb.Aut
+ 
+     def _do_perform_authentication (self):
+         result = pysmb.AuthContext.perform_authentication (self)
+-        self.do_perform_authentication_result = result
++        self._do_perform_authentication_result = result
+         self._gui_event.set ()
+         
+     def perform_authentication (self):

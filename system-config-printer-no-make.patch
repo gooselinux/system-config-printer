@@ -1,0 +1,19 @@
+diff -up system-config-printer-1.1.16/system-config-printer.py.no-make system-config-printer-1.1.16/system-config-printer.py
+--- system-config-printer-1.1.16/system-config-printer.py.no-make	2010-02-25 14:52:15.000000000 +0100
++++ system-config-printer-1.1.16/system-config-printer.py	2010-02-25 15:04:42.000000000 +0100
+@@ -6375,10 +6375,13 @@ class NewPrinterGUI(GtkGUI):
+         model = self.tvNPMakes.get_model()
+         model.clear()
+         found = False
+-        auto_make_lower = self.auto_make.lower ()
++        if self.auto_make:
++            auto_make_lower = self.auto_make.lower ()
++        else:
++            auto_make_lower = None
+         for make in makes:
+             iter = model.append((make,))
+-            if make.lower() == auto_make_lower:
++            if auto_make_lower != None and make.lower() == auto_make_lower:
+                 path = model.get_path(iter)
+                 self.tvNPMakes.set_cursor (path)
+                 self.tvNPMakes.scroll_to_cell(path, None,

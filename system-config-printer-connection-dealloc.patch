@@ -1,0 +1,69 @@
+diff -up system-config-printer-1.1.16/pycups-1.9.47/cupsconnection.c.connection-dealloc system-config-printer-1.1.16/pycups-1.9.47/cupsconnection.c
+--- system-config-printer-1.1.16/pycups-1.9.47/cupsconnection.c.connection-dealloc	2009-12-22 14:39:42.000000000 +0100
++++ system-config-printer-1.1.16/pycups-1.9.47/cupsconnection.c	2010-03-10 14:52:13.000000000 +0100
+@@ -230,37 +230,43 @@ Connection_dealloc (Connection *self)
+ {
+   int i, j;
+ 
+-  if (NumConnections > 1)
+-  {
+-    Connection **new_array = calloc (NumConnections - 1,
+-				     sizeof (Connection *));
++  for (j = 0; j < NumConnections; j++)
++    if (Connections[j] == self)
++      break;
+ 
+-    for (i = 0, j = 0; i < NumConnections; i++)
++  if (j < NumConnections)
++  {
++    if (NumConnections > 1)
+     {
+-      if (Connections[i] == self)
++      Connection **new_array = calloc (NumConnections - 1,
++				       sizeof (Connection *));
++
++      if (new_array)
+       {
+-	if (!new_array)
+-	  Connections[i] = NULL;
++	int k;
++	for (i = 0, k = 0; i < NumConnections; i++)
++	{
++	  if (i == j)
++	    continue;
+ 
+-	continue;
+-      }
++	  new_array[k++] = Connections[i];
++	}
+ 
+-      if (new_array)
+-	new_array[j++] = Connections[i];
++	free (Connections);
++	Connections = new_array;
++	NumConnections--;
++      } else
++	/* Failed to allocate memory. Just clear out the reference. */
++	Connections[j] = NULL;
+     }
+-
+-    if (new_array) {
++    else
++    {
++      /* The only element is the one we no longer need. */
+       free (Connections);
+-      Connections = new_array;
+-      NumConnections--;
++      Connections = NULL;
++      NumConnections = 0;
+     }
+   }
+-  else
+-  {
+-    free (Connections);
+-    Connections = NULL;
+-    NumConnections = 0;
+-  }
+ 
+   if (self->http) {  
+     debugprintf ("httpClose()\n");

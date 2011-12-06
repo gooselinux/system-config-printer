@@ -1,0 +1,50 @@
+diff -up system-config-printer-1.1.16/options.py.copy-crash system-config-printer-1.1.16/options.py
+--- system-config-printer-1.1.16/options.py.copy-crash	2009-12-22 14:44:19.000000000 +0000
++++ system-config-printer-1.1.16/options.py	2010-01-11 16:05:04.352909594 +0000
+@@ -1,8 +1,9 @@
+ ## system-config-printer
+ 
+-## Copyright (C) 2006, 2007, 2008 Red Hat, Inc.
+-## Copyright (C) 2008 Tim Waugh <twaugh@redhat.com>
+-## Copyright (C) 2006 Florian Festi <ffesti@redhat.com>
++## Copyright (C) 2006, 2007, 2008, 2010 Red Hat, Inc.
++## Authors:
++##  Tim Waugh <twaugh@redhat.com>
++##  Florian Festi <ffesti@redhat.com>
+ 
+ ## This program is free software; you can redistribute it and/or modify
+ ## it under the terms of the GNU General Public License as published by
+@@ -63,6 +64,9 @@ def OptionWidget(name, v, s, on_change):
+ # ---------------------------------------------------------------------------
+ 
+ class OptionInterface:
++    def get_default(self):
++        return None
++
+     def get_current_value(self):
+         raise NotImplemented
+ 
+@@ -105,6 +109,9 @@ class OptionAlwaysShown(OptionInterface)
+         self.use_supported = use_supported
+         self.reinit (None)
+ 
++    def get_default(self):
++        return self.system_default
++
+     def set_default(self, system_default):
+         # For the media option, the system default depends on the printer's
+         # PageSize setting.  This method allows the main module to tell us
+diff -up system-config-printer-1.1.16/system-config-printer.py.copy-crash system-config-printer-1.1.16/system-config-printer.py
+--- system-config-printer-1.1.16/system-config-printer.py.copy-crash	2010-01-11 16:05:04.342910797 +0000
++++ system-config-printer-1.1.16/system-config-printer.py	2010-01-11 16:05:22.957910696 +0000
+@@ -2069,8 +2069,8 @@ class GUI(GtkGUI, monitor.Watcher):
+                     printer.unsetOption(option)
+             for option in self.server_side_options.itervalues():
+                 if (option.is_changed() or
+-                    saveall and
+-                    option.get_current_value () != option.system_default):
++                    (saveall and
++                     option.get_current_value () != option.get_default())):
+                     printer.setOption(option.name, option.get_current_value())
+ 
+         except cups.IPPError, (e, s):

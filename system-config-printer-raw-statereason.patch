@@ -1,0 +1,23 @@
+diff -up system-config-printer-1.1.16/statereason.py.raw-statereason system-config-printer-1.1.16/statereason.py
+--- system-config-printer-1.1.16/statereason.py.raw-statereason	2010-01-24 11:39:59.564183236 +0000
++++ system-config-printer-1.1.16/statereason.py	2010-01-24 11:40:09.827308551 +0000
+@@ -137,6 +137,7 @@ class StateReason:
+                 except (cups.IPPError, OSError):
+                     pass
+ 
++            reason = self.get_reason ()
+             if self._ppd:
+                 try:
+                     schemes = ["text", "http", "help", "file"]
+@@ -148,10 +149,8 @@ class StateReason:
+                             localized_reason = localized_reason + reason + ", "
+                     if localized_reason != "":
+                         reason = localized_reason[:-2]
+-                    else:
+-                        reason = self.get_reason()
+                 except RuntimeError:
+-                    reason = self.get_reason()
++                    pass
+ 
+             text = _("Printer '%s': '%s'.") % (self.get_printer (), reason)
+         return (title, text)
